@@ -20,3 +20,25 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+
+@api.route('/create_user', methods=['POST'])
+def create_user():
+    data = request.get_json()
+    email    = data.get("email", "").strip()
+    password = data.get("password", "").strip()
+
+    if not email or not password:
+        return jsonify({"error":"No llegó toda la info"}),400
+
+    existing_user = User.query.filter_by(email=email).first()
+    if existing_user:
+        return jsonify({"error":"ya hay un usuario con ese email"}),409
+    
+    new_user = User(email=email, password=password,is_active = True)
+    db.session.add(new_user)
+    db.session.commit()
+
+    new_user_to_share = new_user.serialize()
+
+    return jsonify({"mensage":"Un éxito", "user":new_user_to_share}),201

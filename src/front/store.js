@@ -1,5 +1,6 @@
 export const initialStore=()=>{
   return{
+    dataUser:{},
     message: null,
     todos: [
       {
@@ -32,6 +33,14 @@ export default function storeReducer(store, action = {}) {
         ...store,
         todos: store.todos.map((todo) => (todo.id === id ? { ...todo, background: color } : todo))
       };
+
+        case 'save_new_user':
+      // guardamos en el store la data del usuario que vino del backend
+      return {
+        ...store,
+        dataUser: action.payload
+      };
+
     default:
       throw Error('Unknown action.');
   }    

@@ -1,10 +1,45 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
 export const Home = () => {
 
 	const { store, dispatch } = useGlobalReducer()
+	const [form, setForm] = useState({
+		email: "",
+		password: ""
+	})
+
+	const handleForm = (event) => {
+		let value = event.target.value;
+		let type = event.target.name;
+		setForm(prev => ({ ...prev, [type]: value }));
+	}
+const handleCreateUser = async () => {
+  try {
+    // saco cualquier slash al final
+    const backendUrl = import.meta.env.VITE_BACKEND_URL.replace(/\/+$/, '')
+    // armo la URL completa bien
+    const url = `${backendUrl}/api/create_user`
+    console.log("🚀 POST a:", url)
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
+    })
+
+    if (!response.ok) {
+      throw new Error(`Servidor respondió ${response.status}`)
+    }
+
+    const data = await response.json()
+    dispatch({ type: "save_new_user", payload: data.user || data })
+
+  } catch (err) {
+    console.error("handleCreateUser:", err)
+  }
+}
 
 	const loadMessage = async () => {
 		try {
@@ -47,6 +82,32 @@ export const Home = () => {
 					</span>
 				)}
 			</div>
+
+			<div style={{ backgroundColor: "blue" }}>
+				<h2>Crear usuario</h2>
+				<br />
+				<label htmlFor="nombre">email:</label>
+				<input type="email" name="email" id="email" onChange={(e) => handleForm(e)} />
+				<br />
+				<label htmlFor="nombre">password:</label>
+				<input type="password" name="password" id="password" onChange={(e) => handleForm(e)} />
+				<br />
+				<button onClick={handleCreateUser}>Crear usuario</button>
+
+			</div>
+
+			<div className="mt-4">
+				{store.dataUser ? (
+					<div>
+						<p>ID: {store.dataUser.id}</p>
+						<p>Email: {store.dataUser.email}</p>
+					</div>
+				) : (
+					<p>Usuario todavía no creado</p>
+				)}
+			</div>
+
+
 		</div>
 	);
 }; 
